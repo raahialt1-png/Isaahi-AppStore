@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>OpenStore</title>
+<style>
+    :root {
+        --bg-color: #ffffff;
+        --bg-secondary: #f2f2f7;
+        --text-primary: #1c1c1e;
+        --text-secondary: #8e8e93;
+        --accent: #007aff;
+        --divider: #c6c6c8;
+        --safe-bottom: env(safe-area-inset-bottom);
+    }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+    
+    /* Layout */
+    #app-container { height: 100%; display: flex; flex-direction: column; }
+    #main-view { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: calc(80px + var(--safe-bottom)); scroll-behavior: smooth; }
+    
+    /* Typography */
+    h1 { font-size: 34px; font-weight: 800; margin: 0; padding: 10px 20px; letter-spacing: -0.5px; }
+    h2 { font-size: 22px; font-weight: 700; margin: 0 0 10px 0; }
+    h3 { font-size: 17px; font-weight: 600; margin: 0; }
+    p { margin: 0; font-size: 15px; color: var(--text-secondary); line-height: 1.4; }
+
+    /* Header */
+    .header {
+        position: sticky; top: 0; z-index: 10;
+        background: rgba(255,255,255,0.92);
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-bottom: 0.5px solid rgba(0,0,0,0.1);
+        display: flex; justify-content: space-between; align-items: center;
+        padding-right: 20px;
+    }
+    .profile-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #007aff, #5856d6); border-radius: 50%; }
+
+    /* Cards */
+    .card { background: white; border-radius: 16px; overflow: hidden; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; cursor: pointer; transition: transform 0.2s; }
+    .card:active { transform: scale(0.98); }
+    
+    .hero-card { height: 400px; margin: 20px; border-radius: 20px; }
+    .hero-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; }
+    .hero-content p { color: rgba(255,255,255,0.8); }
+
+    .list-item { display: flex; align-items: center; padding: 10px 20px; gap: 15px; border-bottom: 0.5px solid var(--bg-secondary); cursor: pointer; }
+    .list-item:active { background: var(--bg-secondary); }
+    
+    /* Icons */
+    .app-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0; }
+    .app-icon.sm { width: 44px; height: 44px; border-radius: 10px; font-size: 20px; }
+    .app-icon.lg { width: 100px; height: 100px; border-radius: 22px; font-size: 40px; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+
+    /* Buttons */
+    .btn-get {
+        background: var(--bg-secondary); color: var(--accent);
+        font-weight: 700; font-size: 13px; text-transform: uppercase;
+        padding: 6px 16px; border-radius: 20px; border: none; cursor: pointer;
+    }
+    .btn-get:active { background: #e5e5ea; }
+    
+    .btn-primary { background: var(--accent); color: white; width: 100%; padding: 14px; border-radius: 12px; font-size: 17px; font-weight: 600; border: none; margin-top: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    
+    /* Tab Bar */
+    .tab-bar {
+        position: fixed; bottom: 0; width: 100%;
+        background: rgba(255,255,255,0.92);
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-top: 0.5px solid rgba(0,0,0,0.2);
+        display: flex; justify-content: space-around;
+        padding-top: 10px; padding-bottom: calc(10px + var(--safe-bottom));
+        z-index: 100;
+    }
+    .tab-item { display: flex; flex-direction: column; align-items: center; color: var(--text-secondary); font-size: 10px; font-weight: 500; cursor: pointer; width: 60px; }
+    .tab-item.active { color: var(--accent); }
+    .tab-item svg { width: 24px; height: 24px; margin-bottom: 4px; }
+
+    /* Modals/Overlays */
+    .view-layer {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: white; z-index: 50;
+        transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex; flex-direction: column;
+    }
+    .view-layer.open { transform: translateY(0); }
+    
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); z-index: 200;
+        display: none; align-items: center; justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+    .modal-card { background: white; width: 85%; max-width: 340px; border-radius: 20px; padding: 20px; text-align: center; animation: popIn 0.2s; position: relative; }
+    @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* Form Styles */
+    input, textarea, select {
+        width: 100%; padding: 12px; margin-bottom: 15px;
+        background: var(--bg-secondary); border: none; border-radius: 10px;
+        font-size: 17px; font-family: inherit; box-sizing: border-box;
+    }
+    input:focus, textarea:focus, select:focus { outline: none; background: #e5e5ea; }
+
+    /* Animations */
+    .fade-in { animation: fadeIn 0.4s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Colors */
+    .bg-red { background: #ff3b30; }
+    .bg-blue { background: #007aff; }
+    .bg-green { background: #34c759; }
+    .bg-orange { background: #ff9500; }
+    .bg-purple { background: #af52de; }
+    .bg-yellow { background: #ffcc00; }
+
+</style>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="main-view"></div>
+    
+    <nav class="tab-bar">
+        <div class="tab-item active" onclick="router('today')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-9 14H6v-2h4v2zm0-4H6v-2h4v2zm0-4H6V7h4v2zm8 8h-6v-2h6v2zm0-4h-6v-2h6v2zm0-4h-6V7h6v2z"/></svg>
+            Today
+        </div>
+        <div class="tab-item" onclick="router('apps')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/></svg>
+            Apps
+        </div>
+        <div class="tab-item" onclick="router('publish')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+            Publish
+        </div>
+        <div class="tab-item" onclick="router('search')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            Search
+        </div>
+    </nav>
+</div>
+
+<!-- Details View Overlay -->
+<div id="detail-view" class="view-layer">
+    <div style="padding: 20px; overflow-y: auto; height: 100%;">
+        <button onclick="closeDetail()" style="background:none; border:none; color:#007aff; font-size:17px; margin-bottom:10px; display:flex; align-items:center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg> Back
+        </button>
+        <div id="detail-content"></div>
+    </div>
+</div>
+
+<!-- Install Modal -->
+<div id="install-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-card">
+        <h2 id="modal-title">Get App</h2>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+            <button class="btn-primary bg-blue" onclick="download('win')">Windows PC</button>
+            <button class="btn-primary bg-bg-secondary" style="color:black" onclick="download('mac')">Mac</button>
+            <button class="btn-primary bg-bg-secondary" style="color:black" onclick="showHelp('ios')">iPhone / iPad</button>
+            <button class="btn-primary bg-bg-secondary" style="color:black" onclick="showHelp('android')">Android</button>
+            <button class="btn-primary" style="background:transparent; color:#007aff; margin-top:0;" onclick="openUrl()">Just Open Browser</button>
+        </div>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div id="help-modal" class="modal-overlay" onclick="closeHelp(event)">
+    <div class="modal-card">
+        <h2 id="help-title">Install</h2>
+        <ol id="help-steps" style="text-align:left; padding-left:20px; margin:15px 0; font-size:14px; line-height:1.5; color:#555;">
+        </ol>
+        <button id="help-action-btn" class="btn-primary bg-blue">Open App Now</button>
+    </div>
+</div>
+
+<script>
+    // --- Data Management (LocalStorage) ---
+    const DEFAULT_APPS = [
+        { id: '1', name: 'Jade Mountain', developer: 'raahialt1-png', description: 'A fan-made interactive map and guide.', category: 'Entertainment', icon: '🌍', color: 'bg-green', appUrl: 'https://raahialt1-png.github.io/Jade-mountain/' },
+        { id: '2', name: 'Super Tasks', developer: 'Indie Dev', description: 'Manage your daily life with ease.', category: 'Productivity', icon: '💼', color: 'bg-blue', appUrl: 'https://example.com' },
+        { id: '3', name: 'Galaxy Voyager', developer: 'Cosmic Games', description: 'Explore the universe.', category: 'Games', icon: '🎮', color: 'bg-purple', appUrl: 'https://example.com' },
+        { id: '4', name: 'Coffee Timer', developer: 'Brew Master', description: 'Perfect brew every time.', category: 'Lifestyle', icon: '☕', color: 'bg-orange', appUrl: 'https://example.com' }
+    ];
+
+    function getApps() {
+        const stored = localStorage.getItem('openstore_apps');
+        return stored ? JSON.parse(stored) : DEFAULT_APPS;
+    }
+
+    function saveApp(app) {
+        const apps = getApps();
+        app.id = Date.now().toString();
+        apps.unshift(app);
+        localStorage.setItem('openstore_apps', JSON.stringify(apps));
+        router('today'); // Go home after publish
+    }
+
+    // --- State ---
+    let currentApp = null;
+    let currentView = 'today';
+
+    // --- Router/Renderer ---
+    function router(view) {
+        currentView = view;
+        const main = document.getElementById('main-view');
+        const apps = getApps();
+        
+        // Update Tabs
+        document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.tab-item[onclick="router('${view}')"]`).classList.add('active');
+
+        // Render View
+        if (view === 'today') {
+            const hero = apps[0];
+            let html = `
+                <div class="header"><h1>Today</h1><div class="profile-icon"></div></div>
+                <div class="card hero-card ${hero.color}" onclick="openDetail('${hero.id}')">
+                    <div style="height:100%; background: ${getColorCode(hero.color)}"></div>
+                    <div class="hero-content">
+                        <p style="font-weight:700; font-size:12px; opacity:0.8; margin-bottom:5px;">FEATURED APP</p>
+                        <h1 style="padding:0; margin-bottom:5px;">${hero.name}</h1>
+                        <p>${hero.description}</p>
+                    </div>
+                </div>
+                <div style="padding: 0 20px;">
+                    <h2>New & Updated</h2>
+                    ${apps.slice(1, 4).map(app => renderListItem(app)).join('')}
+                </div>
+            `;
+            main.innerHTML = html;
+        } 
+        else if (view === 'apps') {
+            let html = `<div class="header"><h1>Apps</h1><div class="profile-icon"></div></div>`;
+            html += `<div style="padding: 20px;">`;
+            html += apps.map(app => renderListItem(app)).join('');
+            html += `</div>`;
+            main.innerHTML = html;
+        } 
+        else if (view === 'publish') {
+            main.innerHTML = `
+                <div class="header"><h1>Publish</h1></div>
+                <div style="padding: 20px;">
+                    <div style="background:var(--bg-secondary); padding:20px; border-radius:15px; margin-bottom:20px;">
+                        <h3>Auto-Import</h3>
+                        <p style="font-size:12px; margin-bottom:10px;">Paste a GitHub Pages or Repo URL</p>
+                        <div style="display:flex; gap:10px;">
+                            <input id="import-url" placeholder="https://..." style="margin:0;">
+                            <button class="btn-get" onclick="doImport()" style="background:var(--accent); color:white;">Import</button>
+                        </div>
+                    </div>
+                    <form onsubmit="doPublish(event)">
+                        <label>App Name</label><input id="p-name" required>
+                        <label>Developer</label><input id="p-dev" required>
+                        <label>App URL (Launch Link)</label><input id="p-url" required placeholder="https://...">
+                        <label>Description</label><textarea id="p-desc" rows="3" required></textarea>
+                        <div style="display:flex; gap:10px;">
+                            <div style="flex:1"><label>Category</label><select id="p-cat"><option>Productivity</option><option>Games</option><option>Entertainment</option></select></div>
+                            <div style="flex:1"><label>Icon</label><select id="p-icon"><option value="🚀">🚀 Rocket</option><option value="🎮">🎮 Game</option><option value="💼">💼 Work</option><option value="☕">☕ Coffee</option><option value="🌍">🌍 Earth</option></select></div>
+                        </div>
+                        <label>Color</label>
+                        <select id="p-color">
+                            <option value="bg-blue">Blue</option>
+                            <option value="bg-red">Red</option>
+                            <option value="bg-green">Green</option>
+                            <option value="bg-orange">Orange</option>
+                            <option value="bg-purple">Purple</option>
+                        </select>
+                        <button type="submit" class="btn-primary">Submit App</button>
+                    </form>
+                </div>
+            `;
+        }
+        else if (view === 'search') {
+            main.innerHTML = `
+                <div class="header"><h1>Search</h1></div>
+                <div style="padding: 20px;">
+                    <input placeholder="Games, Apps, Stories..." onkeyup="doSearch(this.value)">
+                    <div id="search-results"></div>
+                </div>
+            `;
+            doSearch('');
+        }
+    }
+
+    // --- Helpers ---
+    function renderListItem(app) {
+        return `
+            <div class="list-item fade-in" onclick="openDetail('${app.id}')">
+                <div class="app-icon sm ${app.color}" style="background:${getColorCode(app.color)}">${app.icon}</div>
+                <div style="flex:1;">
+                    <h3 style="margin-bottom:2px;">${app.name}</h3>
+                    <p style="font-size:13px;">${app.category}</p>
+                </div>
+                <button class="btn-get" onclick="openModal(event, '${app.id}')">GET</button>
+            </div>
+        `;
+    }
+
+    function getColorCode(cls) {
+        const map = { 'bg-red': '#ff3b30', 'bg-blue': '#007aff', 'bg-green': '#34c759', 'bg-orange': '#ff9500', 'bg-purple': '#af52de' };
+        return map[cls] || '#8e8e93';
+    }
+
+    // --- Actions ---
+    function openDetail(id) {
+        const apps = getApps();
+        const app = apps.find(a => a.id === id);
+        currentApp = app;
+        
+        const content = document.getElementById('detail-content');
+        content.innerHTML = `
+            <div style="display:flex; gap:20px; margin-bottom:20px;">
+                <div class="app-icon lg" style="background:${getColorCode(app.color)}">${app.icon}</div>
+                <div style="padding-top:10px;">
+                    <h2 style="font-size:24px; margin-bottom:5px;">${app.name}</h2>
+                    <p style="color:var(--text-secondary); margin-bottom:10px;">${app.developer}</p>
+                    <button class="btn-get" style="background:var(--accent); color:white; padding:8px 24px;" onclick="openModal(event, '${app.id}')">GET</button>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:15px 0; border-top:1px solid #eee; border-bottom:1px solid #eee; margin-bottom:20px;">
+                <div style="text-align:center;">
+                    <span style="color:#8e8e93; font-weight:600; font-size:12px;">RATINGS</span>
+                    <div style="font-weight:700; font-size:22px; color:#8e8e93;">4.9 ★</div>
+                </div>
+                <div style="text-align:center;">
+                    <span style="color:#8e8e93; font-weight:600; font-size:12px;">AGE</span>
+                    <div style="font-weight:700; font-size:22px; color:#8e8e93;">4+</div>
+                </div>
+                <div style="text-align:center;">
+                    <span style="color:#8e8e93; font-weight:600; font-size:12px;">CATEGORY</span>
+                    <div style="font-weight:700; font-size:22px; color:#8e8e93;">${app.category.substr(0,4)}</div>
+                </div>
+            </div>
+            <h3>About</h3>
+            <p style="margin-top:10px; line-height:1.6; font-size:16px;">${app.description}</p>
+            <div style="height:50px;"></div>
+        `;
+        document.getElementById('detail-view').classList.add('open');
+    }
+
+    function closeDetail() { document.getElementById('detail-view').classList.remove('open'); }
+
+    function openModal(e, id) {
+        e.stopPropagation();
+        const app = getApps().find(a => a.id === id);
+        currentApp = app;
+        document.getElementById('modal-title').innerText = 'Get ' + app.name;
+        document.getElementById('install-modal').style.display = 'flex';
+    }
+
+    function closeModal(e) {
+        if(e.target.id === 'install-modal') document.getElementById('install-modal').style.display = 'none';
+    }
+    
+    function closeHelp(e) {
+        if(!e || e.target.id === 'help-modal') document.getElementById('help-modal').style.display = 'none';
+    }
+
+    function showHelp(platform) {
+        document.getElementById('install-modal').style.display = 'none';
+        const modal = document.getElementById('help-modal');
+        const title = document.getElementById('help-title');
+        const list = document.getElementById('help-steps');
+        const btn = document.getElementById('help-action-btn');
+        
+        if (platform === 'ios') {
+            title.innerText = "Install on iPhone/iPad";
+            list.innerHTML = `
+                <li>Tap <b>Open App Now</b> below first.</li>
+                <li>Tap the <b>Share</b> button <svg style="width:12px;display:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>.</li>
+                <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
+            `;
+        } else {
+            title.innerText = "Install on Android";
+            list.innerHTML = `
+                 <li>Tap <b>Open App Now</b> below first.</li>
+                 <li>Tap the <b>Menu</b> (3 dots) button.</li>
+                 <li>Tap <b>Install App</b> or <b>Add to Home Screen</b>.</li>
+            `;
+        }
+        
+        btn.onclick = function() {
+            if(currentApp.appUrl) window.open(currentApp.appUrl, '_blank');
+            modal.style.display = 'none';
+        };
+
+        modal.style.display = 'flex';
+    }
+
+    function download(platform) {
+        if(!currentApp.appUrl) return;
+        let content, filename, mime;
+        if(platform === 'win') {
+            content = `[InternetShortcut]\nURL=${currentApp.appUrl}\nIconIndex=0`;
+            filename = `${currentApp.name}.url`;
+            mime = 'text/plain';
+        } else {
+            content = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>URL</key><string>${currentApp.appUrl}</string></dict></plist>`;
+            filename = `${currentApp.name}.webloc`;
+            mime = 'application/xml';
+        }
+        const blob = new Blob([content], { type: mime });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        document.getElementById('install-modal').style.display = 'none';
+    }
+
+    function openUrl() {
+        if(currentApp.appUrl) window.open(currentApp.appUrl, '_blank');
+        document.getElementById('install-modal').style.display = 'none';
+    }
+
+    function doSearch(q) {
+        const apps = getApps();
+        const results = apps.filter(a => a.name.toLowerCase().includes(q.toLowerCase()) || a.category.toLowerCase().includes(q.toLowerCase()));
+        document.getElementById('search-results').innerHTML = results.map(app => renderListItem(app)).join('');
+    }
+
+    function doImport() {
+        const urlStr = document.getElementById('import-url').value;
+        try {
+            const url = new URL(urlStr);
+            const parts = url.pathname.split('/').filter(Boolean);
+            if(url.hostname.includes('github')) {
+                document.getElementById('p-dev').value = parts[0];
+                document.getElementById('p-name').value = (parts[1]||'App').replace(/-/g, ' ');
+                document.getElementById('p-url').value = urlStr;
+                document.getElementById('p-desc').value = `Project by ${parts[0]}`;
+            }
+        } catch(e) { alert("Invalid URL"); }
+    }
+
+    function doPublish(e) {
+        e.preventDefault();
+        const newApp = {
+            name: document.getElementById('p-name').value,
+            developer: document.getElementById('p-dev').value,
+            appUrl: document.getElementById('p-url').value,
+            description: document.getElementById('p-desc').value,
+            category: document.getElementById('p-cat').value,
+            icon: document.getElementById('p-icon').value,
+            color: document.getElementById('p-color').value
+        };
+        saveApp(newApp);
+    }
+
+    // Init
+    router('today');
+
+</script>
+</body>
+</html>
+
+
