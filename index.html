@@ -16,6 +16,7 @@
             --accent: #007aff;
             --danger: #ff3b30;
             --safe-bottom: env(safe-area-inset-bottom);
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -26,60 +27,112 @@
             overflow: hidden;
             -webkit-tap-highlight-color: transparent;
         }
-        #main-view { height: 100%; overflow-y: auto; padding-bottom: calc(90px + var(--safe-bottom)); scroll-behavior: smooth; }
-        .header { position: sticky; top: 0; z-index: 40; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); border-bottom: 0.5px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.9); backdrop-filter: blur(20px); border-top: 0.5px solid rgba(0,0,0,0.1); display: flex; justify-content: space-around; padding-bottom: var(--safe-bottom); z-index: 50; }
-        .tab-item { padding: 10px; display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-secondary); cursor: pointer; }
+        #main-view { height: 100%; overflow-y: auto; padding-bottom: calc(100px + var(--safe-bottom)); scroll-behavior: smooth; }
+        
+        /* Modern Header */
+        .header { 
+            position: sticky; top: 0; z-index: 40; 
+            background: rgba(255,255,255,0.85); 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 0.5px solid rgba(0,0,0,0.05); 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px 20px; 
+        }
+        .header h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+
+        /* Navigation Tab Bar */
+        .tab-bar { 
+            position: fixed; bottom: 0; width: 100%; 
+            background: rgba(255,255,255,0.9); 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid rgba(0,0,0,0.1); 
+            display: flex; justify-content: space-around; 
+            padding-bottom: calc(5px + var(--safe-bottom)); 
+            padding-top: 8px;
+            z-index: 50; 
+        }
+        .tab-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: color 0.2s; }
         .tab-item.active { color: var(--accent); }
-        .app-card { background: white; border-radius: 18px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .app-icon { width: 60px; height: 60px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; }
-        .view-layer { position: fixed; inset: 0; background: white; z-index: 100; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
+        .tab-item svg { margin-bottom: 4px; transition: transform 0.2s; }
+        .tab-item:active svg { transform: scale(0.9); }
+
+        /* Premium App Cards */
+        .app-card { background: white; border-radius: 28px; margin-bottom: 24px; overflow: hidden; box-shadow: var(--card-shadow); transition: transform 0.3s ease; }
+        .app-card:active { transform: scale(0.98); }
+        
+        .app-icon { 
+            width: 60px; height: 60px; border-radius: 16px; flex-shrink: 0; 
+            display: flex; align-items: center; justify-content: center; 
+            color: white; font-size: 26px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .app-icon.sm { width: 48px; height: 48px; border-radius: 12px; font-size: 20px; }
+        .app-icon.lg { width: 110px; height: 110px; border-radius: 24px; font-size: 48px; }
+
+        /* Layering for Views */
+        .view-layer { position: fixed; inset: 0; background: white; z-index: 100; transform: translateY(100%); transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1); display: flex; flex-direction: column; }
         .view-layer.open { transform: translateY(0); }
+        
+        /* App Runner Overlay */
         #app-runner { position: fixed; inset: 0; background: black; z-index: 1000; display: none; flex-direction: column; }
-        #app-runner iframe { flex: 1; border: none; background: white; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
-        .modal-card { background: white; width: 90%; max-width: 400px; border-radius: 28px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        #app-runner iframe { flex: 1; border: none; background: white; border-radius: 0; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 200; display: none; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
+        .modal-card { background: white; width: 90%; max-width: 400px; border-radius: 32px; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* UI Elements */
+        input, textarea, select { 
+            width: 100%; padding: 16px; border-radius: 14px; 
+            background: #f2f2f7; border: 1.5px solid transparent; 
+            font-size: 16px; margin-bottom: 14px; transition: all 0.2s;
+            outline: none;
+        }
+        input:focus, textarea:focus { background: white; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); }
+        
+        .btn-primary { width: 100%; padding: 18px; border-radius: 18px; font-weight: 700; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-primary:active { transform: scale(0.96); opacity: 0.85; }
+        
+        .external-link-badge { font-size: 10px; font-weight: 800; background: rgba(0, 122, 255, 0.08); color: var(--accent); padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
         .loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { width: 30px; height: 30px; border: 3px solid #eee; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
-        input, textarea, select { width: 100%; padding: 12px; border-radius: 12px; background: #f2f2f7; border: none; font-size: 16px; margin-bottom: 8px; outline-color: var(--accent); }
-        .btn-primary { width: 100%; padding: 14px; border-radius: 14px; font-weight: 700; transition: opacity 0.2s; }
-        .btn-primary:active { opacity: 0.7; }
-        
-        .external-link-badge { font-size: 9px; font-weight: 800; background: rgba(0,0,0,0.05); color: #666; padding: 2px 6px; border-radius: 6px; display: inline-flex; align-items: center; gap: 3px; margin-top: 4px; border: 0.5px solid rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
 <div id="loading-screen" class="loading-overlay">
     <div class="spinner"></div>
-    <p class="mt-4 text-gray-500 font-medium text-sm tracking-wide">CONNECTING TO ISAAHI</p>
+    <p class="mt-6 text-gray-400 font-bold text-xs tracking-[0.2em] uppercase">Isaahi Cloud Link</p>
 </div>
 
 <div id="app-container">
     <div id="main-view"></div>
     <nav class="tab-bar">
-        <div class="tab-item active" onclick="router('today')"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Today</div>
-        <div class="tab-item" onclick="router('apps')"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/></svg>Apps</div>
-        <div class="tab-item" onclick="router('publish')"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>Publish</div>
-        <div class="tab-item" onclick="router('search')"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>Search</div>
+        <div class="tab-item active" onclick="router('today')"><svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Today</div>
+        <div class="tab-item" onclick="router('apps')"><svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/></svg>Apps</div>
+        <div class="tab-item" onclick="router('publish')"><svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>Publish</div>
+        <div class="tab-item" onclick="router('search')"><svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>Search</div>
     </nav>
 </div>
 
 <div id="detail-view" class="view-layer">
-    <div class="p-5 flex flex-col h-full overflow-y-auto">
-        <button onclick="closeDetail()" class="text-blue-500 font-bold flex items-center mb-4"><svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Back</button>
+    <div class="p-6 flex flex-col h-full overflow-y-auto">
+        <button onclick="closeDetail()" class="text-blue-500 font-black flex items-center mb-8 bg-blue-50 self-start px-4 py-2 rounded-full active:scale-95 transition-transform"><svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" stroke-width="4" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> BACK</button>
         <div id="detail-content"></div>
     </div>
 </div>
 
 <div id="app-runner">
-    <div class="bg-gray-900 text-white p-3 flex justify-between items-center">
-        <span id="runner-title" class="font-bold truncate max-w-[200px]">App</span>
-        <button onclick="closeAppRunner()" class="bg-red-500 px-4 py-1 rounded-full text-xs font-bold uppercase">Close</button>
+    <div class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-lg">
+        <span id="runner-title" class="font-bold truncate max-w-[200px] text-sm">App Runner</span>
+        <button onclick="closeAppRunner()" class="bg-red-500 px-6 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider active:scale-90 transition-transform">Close App</button>
     </div>
-    <iframe id="runner-frame"></iframe>
+    <iframe id="runner-frame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
 </div>
 
 <div id="modal-overlay" class="modal-overlay" onclick="if(event.target===this) this.style.display='none'">
@@ -102,7 +155,7 @@
     let currentApp = null;
     let uploadedFile = null;
 
-    // --- Global Logic ---
+    // --- Core Startup ---
     async function init() {
         const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         if (token) await signInWithCustomToken(auth, token);
@@ -132,7 +185,7 @@
             await addDoc(appsRef, {
                 name: "Isaahi App Store",
                 developerName: "raahialt1-png",
-                description: "The official web portal for the Isaahi App ecosystem.",
+                description: "The official web hub for Isaahi apps. Publish and discover web apps instantly.",
                 appUrl: storeUrl,
                 icon: "🏬",
                 color: "bg-blue-600",
@@ -155,86 +208,102 @@
         if(tab) tab.classList.add('active');
         
         const profileInitials = user && !user.isAnonymous ? "OK" : "IA";
-        const profileIcon = `<div onclick="openAccount()" class="w-8 h-8 rounded-full ${user && !user.isAnonymous ? 'bg-blue-600' : 'bg-gray-200 text-gray-400'} text-white flex items-center justify-center text-[10px] font-black cursor-pointer transition-transform active:scale-90 shadow-sm">${profileInitials}</div>`;
+        const profileIcon = `<div onclick="openAccount()" class="w-10 h-10 rounded-full ${user && !user.isAnonymous ? 'bg-blue-600' : 'bg-gray-200 text-gray-400'} text-white flex items-center justify-center text-[10px] font-black cursor-pointer transition-transform active:scale-90 shadow-md">${profileInitials}</div>`;
 
         if (view === 'today') {
             const hero = apps[0];
             main.innerHTML = `
-                <div class="header"><h1>Isaahi</h1>${profileIcon}</div>
-                <div class="p-5">
+                <div class="header"><h1>Today</h1>${profileIcon}</div>
+                <div class="p-6">
                     ${hero ? `
-                    <div class="app-card relative h-96 cursor-pointer shadow-xl overflow-hidden" onclick="openDetail('${hero.id}')">
-                        <div class="absolute inset-0 ${hero.color || 'bg-blue-500'} opacity-90"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-6 text-white bg-gradient-to-t from-black/80 to-transparent">
-                            <span class="text-[10px] font-black uppercase tracking-widest opacity-70">Featured App</span>
-                            <h2 class="text-3xl font-extrabold my-1">${hero.name}</h2>
-                            <p class="text-sm opacity-90 line-clamp-2">${hero.description}</p>
-                            ${hero.appUrl.startsWith('http') ? `<div class="mt-3 text-[10px] bg-white/20 px-2 py-1 rounded inline-flex items-center gap-1 font-bold"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> ${new URL(hero.appUrl).hostname}</div>` : ''}
+                    <div class="app-card relative h-[460px] cursor-pointer overflow-hidden" onclick="openDetail('${hero.id}')">
+                        <div class="absolute inset-0 ${hero.color || 'bg-blue-500'} opacity-95"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 text-white bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                            <span class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-2 block">App of the Day</span>
+                            <h2 class="text-4xl font-black my-2 leading-tight">${hero.name}</h2>
+                            <p class="text-sm font-medium opacity-90 line-clamp-2">${hero.description}</p>
+                            ${hero.appUrl.startsWith('http') ? `
+                            <div class="mt-5 flex items-center gap-2">
+                                <div class="text-[9px] bg-white/20 border border-white/20 px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 font-black uppercase tracking-tighter backdrop-blur-md">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> 
+                                    ${new URL(hero.appUrl).hostname}
+                                </div>
+                            </div>` : ''}
                         </div>
-                    </div>` : '<p class="text-center py-20 text-gray-400">Loading apps...</p>'}
-                    <h2 class="mt-8 mb-4">Discover More</h2>
-                    ${apps.slice(1, 20).map(a => renderListItem(a)).join('')}
+                    </div>` : '<div class="h-96 flex items-center justify-center text-gray-400 font-bold uppercase tracking-widest">Loading...</div>'}
+                    <h2 class="mt-12 mb-6 text-2xl font-black tracking-tight">Top Picks</h2>
+                    <div class="space-y-2">
+                        ${apps.slice(1, 30).map(a => renderListItem(a)).join('')}
+                    </div>
                 </div>`;
         } else if (view === 'apps') {
-            main.innerHTML = `<div class="header"><h1>Apps</h1>${profileIcon}</div><div class="p-5">${apps.map(a => renderListItem(a)).join('')}</div>`;
+            main.innerHTML = `<div class="header"><h1>Apps</h1>${profileIcon}</div><div class="p-6 space-y-2">${apps.map(a => renderListItem(a)).join('')}</div>`;
         } else if (view === 'publish') {
             if (!user || user.isAnonymous) {
-                main.innerHTML = `<div class="header"><h1>Publish</h1>${profileIcon}</div><div class="p-10 text-center"><h2>Join the Store</h2><p class="text-gray-500 mb-6">Create an account to publish and manage your apps.</p><button onclick="openAuth()" class="btn-primary bg-blue-600 text-white">Log In / Sign Up</button></div>`;
+                main.innerHTML = `<div class="header"><h1>Publish</h1>${profileIcon}</div><div class="p-12 text-center h-full flex flex-col justify-center">
+                    <div class="w-24 h-24 bg-gray-100 rounded-[32px] mx-auto mb-8 flex items-center justify-center text-gray-300 text-4xl">🔐</div>
+                    <h2 class="text-2xl font-black">Developer Login</h2>
+                    <p class="text-gray-500 mb-8 max-w-[240px] mx-auto text-sm leading-relaxed">Join our developer community to publish your web apps to Isaahi.</p>
+                    <button onclick="openAuth()" class="btn-primary bg-blue-600 text-white shadow-xl shadow-blue-200">Sign In to Continue</button>
+                </div>`;
                 return;
             }
             main.innerHTML = `
                 <div class="header"><h1>Publish</h1>${profileIcon}</div>
-                <div class="p-5">
-                    <form id="publish-form" class="space-y-4">
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">App Name</label><input id="p-name" required placeholder="Super App"></div>
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">File Upload (.html)</label>
-                            <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center bg-gray-50 relative">
-                                <span id="file-status" class="text-xs text-gray-400">Tap to select HTML file</span>
+                <div class="p-6">
+                    <form id="publish-form" class="space-y-2">
+                        <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">App Name</label><input id="p-name" required placeholder="Name your app"></div>
+                        <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">HTML Source</label>
+                            <div class="file-upload-box border-2 border-dashed border-gray-200 rounded-[20px] p-10 text-center bg-gray-50 relative hover:border-blue-400 transition-colors">
+                                <span id="file-status" class="text-xs text-gray-400 font-bold uppercase tracking-wide">Drop HTML file here</span>
                                 <input type="file" id="p-file" accept=".html" class="absolute inset-0 opacity-0 cursor-pointer">
                             </div>
                         </div>
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">External Link (Optional)</label><input id="p-url" placeholder="https://..."></div>
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Description</label><textarea id="p-desc" required rows="3" placeholder="Description..."></textarea></div>
+                        <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">External URL</label><input id="p-url" placeholder="https://example.com"></div>
+                        <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Description</label><textarea id="p-desc" required rows="4" placeholder="Describe your app..."></textarea></div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Icon (Emoji)</label><input id="p-icon" value="🚀"></div>
-                            <div><label class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Brand Color</label>
+                            <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Icon (Emoji)</label><input id="p-icon" value="🚀"></div>
+                            <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Branding</label>
                                 <select id="p-color">
-                                    <option value="bg-blue-600">Blue</option><option value="bg-red-500">Red</option>
-                                    <option value="bg-green-500">Green</option><option value="bg-purple-600">Purple</option>
+                                    <option value="bg-blue-600">Ocean Blue</option>
+                                    <option value="bg-red-500">Pulse Red</option>
+                                    <option value="bg-green-500">Leaf Green</option>
+                                    <option value="bg-purple-600">Deep Purple</option>
+                                    <option value="bg-orange-500">Sunset Orange</option>
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="btn-primary bg-blue-600 text-white mt-6 shadow-lg shadow-blue-200">Publish to Isaahi</button>
+                        <button type="submit" class="btn-primary bg-blue-600 text-white mt-10 shadow-2xl shadow-blue-200">Publish App</button>
                     </form>
                 </div>`;
             setupPublishForm();
         } else if (view === 'search') {
-            main.innerHTML = `<div class="header"><h1>Search</h1>${profileIcon}</div><div class="p-5"><input id="search-input" placeholder="Search apps..." class="mb-6"><div id="results"></div></div>`;
+            main.innerHTML = `<div class="header"><h1>Search</h1>${profileIcon}</div><div class="p-6"><input id="search-input" placeholder="Search Isaahi Market..." class="mb-8 p-5 bg-white border border-gray-100 shadow-sm"><div id="results" class="space-y-2"></div></div>`;
             document.getElementById('search-input').oninput = (e) => {
                 const q = e.target.value.toLowerCase();
-                const res = apps.filter(a => a.name.toLowerCase().includes(q));
+                const res = apps.filter(a => a.name.toLowerCase().includes(q) || a.developerName?.toLowerCase().includes(q));
                 document.getElementById('results').innerHTML = res.map(a => renderListItem(a)).join('');
             };
         }
     }
 
     function renderListItem(a) {
-        let domainLabel = "";
+        let externalHint = "";
         if (a.appUrl && a.appUrl.startsWith('http')) {
             try {
                 const url = new URL(a.appUrl);
-                domainLabel = `<div class="external-link-badge"><svg class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> ${url.hostname}</div>`;
+                externalHint = `<div class="external-link-badge"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> ${url.hostname}</div>`;
             } catch(e) {}
         }
 
-        return `<div class="flex items-center gap-4 py-3 border-b border-gray-100" onclick="openDetail('${a.id}')">
+        return `<div class="flex items-center gap-5 py-4 px-2 border-b border-gray-50 active:bg-gray-100/50 rounded-2xl transition-all" onclick="openDetail('${a.id}')">
             <div class="app-icon sm ${a.color || 'bg-blue-600'}">${a.icon || '🚀'}</div>
             <div class="flex-1 min-w-0">
-                <h3 class="text-gray-900 font-bold truncate leading-tight">${a.name}</h3>
-                <p class="text-[11px] text-gray-400 truncate">${a.developerName || 'Unknown'}</p>
-                ${domainLabel}
+                <h3 class="text-[15px] text-gray-900 font-bold truncate leading-tight">${a.name}</h3>
+                <p class="text-[12px] text-gray-400 font-medium truncate">${a.developerName || 'Unknown'}</p>
+                ${externalHint}
             </div>
-            <button class="bg-gray-100 text-blue-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight active:scale-95" onclick="event.stopPropagation(); openGetModal('${a.id}')">GET</button>
+            <button class="bg-blue-50 text-blue-600 px-6 py-1.5 rounded-full text-[11px] font-black uppercase tracking-tight active:scale-90 transition-transform" onclick="event.stopPropagation(); openGetModal('${a.id}')">GET</button>
         </div>`;
     }
 
@@ -243,22 +312,26 @@
         currentApp = app;
         const isOwner = user && app.ownerId === user.uid;
         document.getElementById('detail-content').innerHTML = `
-            <div class="flex gap-5 items-end mb-6">
+            <div class="flex gap-6 items-end mb-10">
                 <div class="app-icon lg ${app.color}">${app.icon}</div>
                 <div class="flex-1 min-w-0">
-                    <h2 class="text-2xl font-black">${app.name}</h2>
-                    <p class="text-gray-400 font-medium">${app.developerName}</p>
-                    <button class="bg-blue-600 text-white px-8 py-1.5 rounded-full text-sm font-bold mt-2 shadow-lg shadow-blue-100" onclick="openGetModal('${app.id}')">GET</button>
+                    <h2 class="text-3xl font-black tracking-tight leading-tight">${app.name}</h2>
+                    <p class="text-gray-400 font-semibold text-base mt-1">${app.developerName}</p>
+                    <button class="bg-blue-600 text-white px-12 py-2.5 rounded-full text-sm font-black mt-4 shadow-xl shadow-blue-100 active:scale-95 transition-transform" onclick="openGetModal('${app.id}')">GET</button>
                 </div>
             </div>
-            <div class="flex border-y border-gray-100 py-4 mb-6 justify-around text-center">
-                <div><p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Store Rank</p><p class="text-xl font-bold text-gray-700">#${Math.floor(Math.random()*20)+1}</p></div>
-                <div><p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Age</p><p class="text-xl font-bold text-gray-700">4+</p></div>
-                <div><p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Version</p><p class="text-xl font-bold text-gray-700">1.0</p></div>
+            <div class="flex border-y border-gray-100 py-8 mb-10 justify-around text-center">
+                <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Rank</p><p class="text-2xl font-black text-gray-900">#${Math.floor(Math.random()*15)+1}</p></div>
+                <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Age</p><p class="text-2xl font-black text-gray-900">4+</p></div>
+                <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Status</p><p class="text-2xl font-black text-green-500">Live</p></div>
             </div>
-            <h3 class="text-lg font-bold">About</h3>
-            <p class="text-gray-600 mt-2 leading-relaxed whitespace-pre-wrap text-sm mb-10">${app.description}</p>
-            ${isOwner ? `<button id="del-btn" class="btn-primary bg-red-500 text-white mt-10">Remove My App</button>` : ''}
+            <h3 class="text-xl font-black mb-4">What's New</h3>
+            <p class="text-gray-600 leading-relaxed text-[15px] mb-10">Version 1.0.0 - Launching on Isaahi App Store. New UI improvements and stability fixes.</p>
+            
+            <h3 class="text-xl font-black mb-4">Description</h3>
+            <p class="text-gray-500 leading-relaxed whitespace-pre-wrap text-[15px] mb-16">${app.description}</p>
+            
+            ${isOwner ? `<button id="del-btn" class="btn-primary bg-red-500 text-white shadow-2xl shadow-red-100 mb-10 uppercase tracking-widest text-xs">Permanently Delete App</button>` : ''}
         `;
         if (isOwner) document.getElementById('del-btn').onclick = () => deleteApp(app.id);
         document.getElementById('detail-view').classList.add('open');
@@ -267,7 +340,7 @@
     window.closeDetail = () => document.getElementById('detail-view').classList.remove('open');
 
     async function deleteApp(id) {
-        if (!confirm("Remove this app permanently?")) return;
+        if (!confirm("Are you certain you want to delete this app? This cannot be undone.")) return;
         await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'apps', id));
         closeDetail();
     }
@@ -277,20 +350,24 @@
         const modal = document.getElementById('modal-overlay');
         const content = document.getElementById('modal-content');
         
-        let externalHint = "";
-        if (currentApp.appUrl.startsWith('http')) {
-            externalHint = `<div class="mt-4 p-3 bg-gray-50 rounded-xl text-left border border-gray-100">
-                <p class="text-[11px] text-gray-500 leading-normal"><b>Note:</b> This is an external web app. You can launch it now or save it to your home screen via the browser menu.</p>
-            </div>`;
-        }
-
         content.innerHTML = `
-            <h2 class="text-xl font-black">Get ${currentApp.name}</h2>
-            <div class="mt-6 space-y-3">
-                <button onclick="downloadApp('win')" class="btn-primary bg-blue-600 text-white">Download Windows Shortcut</button>
-                <button onclick="downloadApp('mac')" class="btn-primary bg-blue-600 text-white">Download Mac Shortcut</button>
-                <button onclick="runApp()" class="btn-primary bg-gray-100 !text-gray-900 font-black">Launch Instantly</button>
-                ${externalHint}
+            <h2 class="text-2xl font-black mb-2">Install ${currentApp.name}</h2>
+            <p class="text-gray-400 text-sm mb-8">Choose your installation method.</p>
+            <div class="space-y-4">
+                <button onclick="downloadApp('win')" class="btn-primary bg-blue-600 text-white flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M0 3.449L9.75 2.1V11.719H0V3.449zm0 9.13l9.75.051V21.9L0 20.42V12.579zM11.25 1.9L24 0V11.719H11.25V1.9zm12.75 10.73V24l-12.75-1.9v-9.451l12.75.081z"/></svg>
+                    Windows Link
+                </button>
+                <button onclick="downloadApp('mac')" class="btn-primary bg-gray-900 text-white flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/></svg>
+                    macOS Link
+                </button>
+                <button onclick="runApp()" class="btn-primary bg-gray-100 !text-gray-900 font-black border-2 border-gray-200">
+                    Run in App Browser
+                </button>
+                <p class="text-[11px] text-gray-400 mt-6 leading-relaxed italic">
+                    <b>iPad Note:</b> Use 'Run in App Browser' then tap Share > Add to Home Screen.
+                </p>
             </div>
         `;
         modal.style.display = 'flex';
@@ -310,7 +387,7 @@
 
     window.runApp = () => {
         document.getElementById('modal-overlay').style.display = 'none';
-        document.getElementById('runner-title').innerText = currentApp.name;
+        document.getElementById('runner-title').innerText = currentApp.name.toUpperCase();
         document.getElementById('runner-frame').src = currentApp.appUrl;
         document.getElementById('app-runner').style.display = 'flex';
     }
@@ -330,12 +407,12 @@
         const content = document.getElementById('modal-content');
         content.innerHTML = `
             <div id="auth-box">
-                <h2 class="text-2xl font-black">Developer ID</h2>
-                <p class="text-gray-400 mb-6 text-sm">Log in to manage your Isaahi profile.</p>
-                <input id="auth-email" type="email" placeholder="Email address">
+                <h2 class="text-3xl font-black mb-3 leading-tight text-center">Isaahi Account</h2>
+                <p class="text-gray-400 mb-8 text-sm text-center">Connect to publish and manage apps.</p>
+                <input id="auth-email" type="email" placeholder="Email Address">
                 <input id="auth-pass" type="password" placeholder="Password">
-                <button id="auth-btn" class="btn-primary bg-blue-600 text-white mt-2">Sign In</button>
-                <button onclick="toggleAuthMode(this)" class="w-full text-blue-600 text-xs mt-4 font-bold">Create a new account</button>
+                <button id="auth-btn" class="btn-primary bg-blue-600 text-white mt-4 shadow-xl shadow-blue-100">Sign In</button>
+                <button onclick="toggleAuthMode(this)" class="w-full text-blue-600 text-xs mt-8 font-black uppercase tracking-widest">Create New Profile</button>
             </div>
         `;
         document.getElementById('auth-btn').onclick = () => handleAuthAction('login');
@@ -345,21 +422,21 @@
     window.toggleAuthMode = (btn) => {
         const h2 = btn.parentElement.querySelector('h2');
         const actionBtn = document.getElementById('auth-btn');
-        if (h2.innerText === 'Developer ID') {
+        if (h2.innerText === 'Isaahi Account') {
             h2.innerText = 'Join Isaahi';
             const nameInput = document.createElement('input');
             nameInput.id = 'auth-name';
             nameInput.placeholder = 'Public Name';
             btn.parentElement.insertBefore(nameInput, document.getElementById('auth-email'));
-            actionBtn.innerText = 'Sign Up';
+            actionBtn.innerText = 'Create Account';
             actionBtn.onclick = () => handleAuthAction('signup');
-            btn.innerText = 'Back to Log In';
+            btn.innerText = 'Switch to Log In';
         } else {
-            h2.innerText = 'Developer ID';
+            h2.innerText = 'Isaahi Account';
             document.getElementById('auth-name')?.remove();
             actionBtn.innerText = 'Sign In';
             actionBtn.onclick = () => handleAuthAction('login');
-            btn.innerText = "Create a new account";
+            btn.innerText = "Create New Profile";
         }
     }
 
@@ -384,11 +461,11 @@
         const modal = document.getElementById('modal-overlay');
         const content = document.getElementById('modal-content');
         content.innerHTML = `
-            <div class="text-center">
-                <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">${profile?.name?.[0] || 'U'}</div>
-                <h2 class="text-xl font-black">${profile?.name || 'Developer'}</h2>
-                <p class="text-gray-400 text-sm mb-8">${user.email}</p>
-                <button id="logout-btn" class="btn-primary bg-red-500 text-white">Log Out</button>
+            <div class="text-center p-2">
+                <div class="w-24 h-24 bg-blue-600 rounded-[32px] mx-auto mb-6 flex items-center justify-center text-white text-4xl font-black shadow-2xl shadow-blue-200">${profile?.name?.[0] || 'U'}</div>
+                <h2 class="text-2xl font-black">${profile?.name || 'Developer'}</h2>
+                <p class="text-gray-400 text-base mb-12 font-medium">${user.email}</p>
+                <button id="logout-btn" class="btn-primary bg-red-50 text-red-600 font-black tracking-widest text-xs uppercase border border-red-100">Sign Out</button>
             </div>
         `;
         document.getElementById('logout-btn').onclick = handleLogout;
@@ -408,8 +485,8 @@
             const reader = new FileReader();
             reader.onload = (ev) => {
                 uploadedFile = ev.target.result;
-                document.getElementById('file-status').innerText = file.name;
-                document.getElementById('file-status').classList.add('text-blue-600', 'font-bold');
+                document.getElementById('file-status').innerText = "SELECTED: " + file.name.toUpperCase();
+                document.getElementById('file-status').className = 'text-blue-600 font-black text-[11px] tracking-widest';
             };
             reader.readAsDataURL(file);
         };
@@ -432,7 +509,7 @@
 
             if (!appData.appUrl) return alert("Select a file or provide a link.");
             const btn = e.target.querySelector('button');
-            btn.disabled = true; btn.innerText = "Publishing...";
+            btn.disabled = true; btn.innerText = "PUBLISHING...";
             await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'apps'), appData);
             uploadedFile = null;
             router('today');
